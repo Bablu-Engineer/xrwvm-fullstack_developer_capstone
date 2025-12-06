@@ -58,17 +58,46 @@ app.get('/fetchReviews/dealer/:id', async (req, res) => {
 
 // Express route to fetch all dealerships
 app.get('/fetchDealers', async (req, res) => {
-//Write your code here
+  try {
+    const dealers = await Dealerships.find();
+    res.json(dealers);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching dealerships' });
+  }
 });
 
 // Express route to fetch Dealers by a particular state
 app.get('/fetchDealers/:state', async (req, res) => {
-//Write your code here
+  try {
+    const state = req.params.state;
+    // case-insensitive exact match
+    const dealers = await Dealerships.find({ state: { $regex: new RegExp(`^${state}$`, 'i') } });
+    res.json(dealers);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching dealerships by state' });
+  }
 });
 
-// Express route to fetch dealer by a particular id
+
 app.get('/fetchDealer/:id', async (req, res) => {
-//Write your code here
+  try {
+    const idParam = req.params.id;
+    // try numeric id first
+    const numericId = Number(idParam);
+    let dealer = null;
+    if (!Number.isNaN(numericId)) {
+      dealer = await Dealerships.findOne({ id: numericId });
+    }
+    // fallback to Mongo _id
+    if (!dealer && mongoose.Types.ObjectId.isValid(idParam)) {
+      dealer = await Dealerships.findById(idParam);
+    }
+
+    if (!dealer) return res.status(404).json({ error: 'Dealership not found' });
+    res.json(dealer);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching dealership' });
+  }
 });
 
 //Express route to insert review
