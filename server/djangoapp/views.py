@@ -1,12 +1,9 @@
 import json
 import logging
-from datetime import datetime
 
-from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import CarMake, CarModel
@@ -53,6 +50,7 @@ def logout_request(request):
 # ---------------------------------------------------------
 @csrf_exempt
 def registration(request):
+    """Register new user and log them in."""
     data = json.loads(request.body)
 
     username = data["userName"]
@@ -78,35 +76,33 @@ def registration(request):
     )
 
     login(request, user)
-
-    return JsonResponse(
-        {"userName": username, "status": "Authenticated"}
-    )
+    return JsonResponse({"userName": username, "status": "Authenticated"})
 
 
 # ---------------------------------------------------------
-# GET CARS
+# CARS
 # ---------------------------------------------------------
 def get_cars(request):
+    """Return all cars and auto-populate DB if empty."""
     count = CarMake.objects.count()
 
-    # Auto-populate if empty
     if count == 0:
         initiate()
 
     car_models = CarModel.objects.select_related("car_make")
     cars = [
-        {"CarModel": c.name, "CarMake": c.car_make.name}
-        for c in car_models
+        {"CarModel": cm.name, "CarMake": cm.car_make.name}
+        for cm in car_models
     ]
 
     return JsonResponse({"CarModels": cars})
 
 
 # ---------------------------------------------------------
-# DEALERSHIPS
+# DEALERS
 # ---------------------------------------------------------
 def get_dealerships(request, state="All"):
+    """Return dealerships optionally filtered by state."""
     if state == "All":
         endpoint = "/fetchDealers"
     else:
