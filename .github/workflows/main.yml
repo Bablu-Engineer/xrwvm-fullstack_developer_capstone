@@ -45,3 +45,4 @@ jobs:
           # This command finds all JavaScript files recursively and runs JSHint on them
           find ./server/database -name "*.js" -exec jshint {} +
           echo "Linted all the js files successfully"
+
