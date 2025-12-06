@@ -1,7 +1,5 @@
-# Uncomment the following imports before adding the Model code
-
 from django.db import models
-from django.utils.timezone import now
+# 'now' is imported but not used, so we remove it
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -15,10 +13,10 @@ class CarMake(models.Model):
     def __str__(self):
         return self.name
 
+
 class CarModel(models.Model):
     # Many-to-one relationship to CarMake
     car_make = models.ForeignKey(CarMake, on_delete=models.CASCADE)
-
     name = models.CharField(max_length=100)
 
     CAR_TYPES = [
@@ -35,13 +33,12 @@ class CarModel(models.Model):
         default=2023,
         validators=[
             MaxValueValidator(2023),
-            MinValueValidator(2015)
-        ]
+            MinValueValidator(2015),
+        ],
     )
 
     # dealer ID from Cloudant database
     dealer_id = models.IntegerField(default=0)
-
     # Optional fields
     color = models.CharField(max_length=100, blank=True, null=True)
 
